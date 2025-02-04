@@ -1,0 +1,97 @@
+// src/components/Dropdown.js
+import React, { useState, useRef, useEffect } from "react";
+import ReactDOM from "react-dom";
+
+const Dropdown = ({
+  options,
+  multiple = false,
+  searchable = false,
+  portal = false,
+  renderOption,
+  toggleFeatures = { search: true },
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selected, setSelected] = useState(multiple ? [] : null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const dropdownRef = useRef(null);
+
+  // Filter options based on search term
+  const filteredOptions = options.filter((option) =>
+    option.label.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Handle option selection
+  const handleSelect = (option) => {
+    if (multiple) {
+      setSelected((prev) =>
+        prev.includes(option) ? prev.filter((item) => item !== option) : [...prev, option]
+      );
+    } else {
+      setSelected(option);
+      setIsOpen(false); // Close dropdown after selection
+    }
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Dropdown content
+  const dropdownContent = (
+    <div
+      ref={dropdownRef}
+      className="absolute mt-2 w-48 bg-white border border-gray-300 rounded shadow-lg z-[1001]"
+    >
+      {toggleFeatures.search && searchable && (
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full p-2 border-b border-gray-300 focus:outline-none"
+        />
+      )}
+      <ul className="max-h-48 overflow-y-auto">
+        {filteredOptions.map((option) => (
+          <li
+            key={option.value}
+            onClick={() => handleSelect(option)}
+            className="p-2 hover:bg-gray-100 cursor-pointer"
+          >
+            {renderOption ? renderOption(option) : option.label}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="p-2 border border-gray-300 rounded focus:outline-none"
+      >
+        {multiple
+          ? selected.length > 0
+            ? selected.map((item) => item.label).join(", ")
+            : "Select options"
+          : selected
+          ? selected.label
+          : "Select an option"}
+      </button>
+      {isOpen &&
+        (portal
+          ? ReactDOM.createPortal(dropdownContent, document.body)
+          : dropdownContent)}
+    </div>
+  );
+};
+
+export default Dropdown;
