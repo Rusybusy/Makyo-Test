@@ -1,0 +1,26 @@
+// src/stories/Dropdown.stories.js
+import React from "react";
+import Dropdown from "../components/Dropdown";
+
+export default {
+  title: "Dropdown",
+  component: Dropdown,
+};
+
+const options = [
+  { value: "1", label: "Option 1" },
+  { value: "2", label: "Option 2" },
+  { value: "3", label: "Option 3" },
+];
+
+export const SingleSelection = () => (
+  <Dropdown options={options} multiple={false} searchable={true} />
+);
+
+export const MultipleSelection = () => (
+  <Dropdown options={options} multiple={true} searchable={true} />
+);
+
+export const WithPortal = () => (
+  <Dropdown options={options} multiple={false} searchable={true} portal={true} />
+);
